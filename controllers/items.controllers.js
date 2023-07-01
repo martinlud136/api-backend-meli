@@ -22,7 +22,11 @@ export async function getItemFromId(req, res) {
   const responseDescription = await fetch(urlDescription);
   const dataDescription = await responseDescription.json();
 
-  const item = getFormatFromId(dataItem, dataDescription);
 
-  res.json(item);
+  if (dataItem.status === 404) {
+    res.status(404).json({});
+  }else{
+    const item = await getFormatFromId(dataItem, dataDescription);
+    res.json(item);
+  }
 }

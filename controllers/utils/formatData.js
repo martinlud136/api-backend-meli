@@ -1,18 +1,26 @@
-async function getCategorylist(dataUrl) {
-  const listCategories = dataUrl.available_filters.filter(
-    (item) => item.id === "category"
-  );
-  const listCategories2 = dataUrl.filters.filter(
-    (item) => item.id === "category"
-  );
+async function getCategorylist(dataUrl, categoryId = null) {
+  let categoryIdFinal;
 
-  const listCategoriesFinal = listCategories.length
-    ? listCategories
-    : listCategories2;
+  if (categoryId) {
+    categoryIdFinal = categoryId;
+  } else {
+    const listCategories = dataUrl.available_filters.filter(
+      (item) => item.id === "category"
+    );
+    const listCategories2 = dataUrl.filters.filter(
+      (item) => item.id === "category"
+    );
 
-  const idCategoryMostResults = listCategoriesFinal[0].values[0].id;
+    const listCategoriesFinal = listCategories.length
+      ? listCategories
+      : listCategories2;
 
-  const categories = `https://api.mercadolibre.com/categories/${idCategoryMostResults}`;
+    const idCategoryMostResults =
+      categoryId ?? listCategoriesFinal[0].values[0].id;
+    categoryIdFinal = idCategoryMostResults;
+  }
+
+  const categories = `https://api.mercadolibre.com/categories/${categoryIdFinal}`;
 
   const responseCategory = await fetch(categories);
   const dataCategory = await responseCategory.json();
@@ -40,9 +48,20 @@ function getItems(data) {
   return items;
 }
 
+const dataWhithoutResults = {
+  author: {
+    name: "Martín Ludueña",
+    lastname: "Ludueña",
+  },
+  categories: [],
+  items: [],
+};
+
 export async function formatData(data) {
+  if (!data.results.length) return dataWhithoutResults;
+
   const categories = await getCategorylist(data);
-  const items = getItems(data.results);
+  const items = await getItems(data.results);
 
   const dataFormated = {
     author: {
@@ -55,8 +74,11 @@ export async function formatData(data) {
   return dataFormated;
 }
 
-export function getFormatFromId(dataItem, dataDescription) {
+export async function getFormatFromId(dataItem, dataDescription) {
   const itemDataFormated = getItems([dataItem])[0];
+  const categoryId = dataItem.category_id;
+
+  const categories = await getCategorylist(null, categoryId);
   const item = {
     author: {
       name: "Martín Ludueña",
@@ -64,8 +86,9 @@ export function getFormatFromId(dataItem, dataDescription) {
     },
     item: {
       ...itemDataFormated,
+      categories,
       sold_quantity: dataItem.sold_quantity,
-      description: dataDescription.plain_text,
+      description: dataDescription.plain_text ?? "Producto sin descripción",
     },
   };
   return item;
