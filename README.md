@@ -11,8 +11,11 @@ Url para obtener detalle de producto:
 ```javascript
 https://api-backend-meli.vercel.app/api/v1/items/MLA1439921006
 ```
-Para correr la API en local se debe ejecutar
+
+Para correr la API en local se debe clonar el proyecto en un repo local y levantarlo en modo dev
 
 ```bash
+git clone git@github.com:martinlud136/api-backend-meli.git
+cd api-backend-meli
 npm run dev
 ```
