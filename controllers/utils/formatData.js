@@ -42,6 +42,7 @@ function getItems(data) {
       picture: curr.thumbnail,
       condition: curr.condition,
       free_shipping: curr.shipping.free_shipping,
+      city: curr.seller_address.state.name
     };
     return [...acc, item];
   }, []);
